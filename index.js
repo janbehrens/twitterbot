@@ -12,7 +12,8 @@ const logfile = './lastId'
 const sendPost = (id, params) => {
   Axios.post(webhookUrl, params).then((response) => {
     if (response.status === 200 && id > lastId) {
-      fs.writeFileSync(logfile, id);
+      fs.writeFileSync(logfile, id)
+      lastId = id
     }
   })
   .catch((error) => {
@@ -21,8 +22,7 @@ const sendPost = (id, params) => {
 }
 
 // Read the ID of the last tweet we've posted
-const fileContents = fs.readFileSync(logfile, { encoding: 'ASCII' })
-const lastId = Number(fileContents)
+let lastId = fs.readFileSync(logfile, { encoding: 'ASCII' })
 
 // Twitter API
 const client = new Twitter({
@@ -34,7 +34,7 @@ const client = new Twitter({
 const timelineParams = {
   screen_name: screenName,
   exclude_replies: true,
-  since_id: lastId,
+  since_id: lastId || undefined,
   count: 10
 }
 
