@@ -6,6 +6,7 @@ const Twitter = require('twitter')
 const webhookUrl = 'https://mattermost.csl-intern.local.hcu-hamburg.de/hooks/' + process.env.MATTERMOST_WEBHOOK
 const screenName = 'citysciencelab'
 const logfile = './lastId'
+let fileContents, lastId
 
 // Send a post (tweet) to Mattermost webhook. If succeeded, log the tweet's ID
 // so we know where to continue next time
@@ -22,7 +23,12 @@ const sendPost = (id, params) => {
 }
 
 // Read the ID of the last tweet we've posted
-let lastId = BigInt(fs.readFileSync(logfile, { encoding: 'ASCII' }))
+try {
+  fileContents = fs.readFileSync(logfile, { encoding: 'ASCII' })
+} catch {
+  throw (`Cannot read from file. Does "${logfile}" exist?`)
+}
+lastId = BigInt(fileContents)
 
 // Twitter API
 const client = new Twitter({
@@ -47,6 +53,11 @@ client.get('statuses/user_timeline', timelineParams, (error, tweets) => {
 
       tweet.id = BigInt(tweet.id.toString())
       const params = {}
+
+      // It shouldn't happen according to Twitter API, but it does ...
+      if (tweet.id <= lastId) {
+        return
+      }
 
       if (tweet.retweeted_status) {
         params.text = `${tweet.user.name} retweeted: ${tweet.retweeted_status.text}`
