@@ -22,7 +22,7 @@ const sendPost = (id, params) => {
 }
 
 // Read the ID of the last tweet we've posted
-let lastId = fs.readFileSync(logfile, { encoding: 'ASCII' })
+let lastId = BigInt(fs.readFileSync(logfile, { encoding: 'ASCII' }))
 
 // Twitter API
 const client = new Twitter({
@@ -34,7 +34,7 @@ const client = new Twitter({
 const timelineParams = {
   screen_name: screenName,
   exclude_replies: true,
-  since_id: lastId || undefined,
+  since_id: Number(lastId) || undefined,
   count: 10
 }
 
@@ -44,6 +44,8 @@ client.get('statuses/user_timeline', timelineParams, (error, tweets) => {
   } else {
     for (const tweet of tweets) {
       console.log(tweet.id, `${tweet.created_at}: ${tweet.text}`)
+
+      tweet.id = BigInt(tweet.id.toString())
       const params = {}
 
       if (tweet.retweeted_status) {
