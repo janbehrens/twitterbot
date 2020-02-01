@@ -3,8 +3,8 @@ const fs = require('fs')
 const Axios = require('axios')
 const Twitter = require('twitter')
 
-const webhookUrl = 'https://mattermost.csl-intern.local.hcu-hamburg.de/hooks/' + process.env.MATTERMOST_WEBHOOK
-const screenName = 'citysciencelab'
+const webhookUrl = process.env.MATTERMOST_WEBHOOK
+const screenName = process.env.TWITTER_HANDLE
 const logfile = './lastId'
 let fileContents, lastId
 
